@@ -1,3 +1,6 @@
+// Local Module
+use sparkx_primegen::driver;
+
 fn main() {
-    println!("Hello, world!");
+    driver::run();
 }
