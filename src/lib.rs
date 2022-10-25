@@ -17,16 +17,19 @@ pub mod common {
         pub fn build() -> Config {
             Config {
                 prime_range_start: 2,
-                prime_range_end: 1000,
+                prime_range_end: BILLION, // Will need >1 GB of ram
                 sieve_segment_size: 100,
-                progress: true,
+                progress: true, // Only for segmented calculation
             }
         }
     }
 }
 
 pub mod driver {
+    // Crate
     use std::{io, io::Write};
+
+    // Local
     use super::common::Config;
     use super::generators;
 
@@ -34,8 +37,8 @@ pub mod driver {
         let config = Config::build();
         println!("Finding Prime Numbers between {} and {}", config.prime_range_start, config.prime_range_end);
 
-        //let primes = generators::sieve_of_eratosthenes(&config);
-        let primes = generators::sieve_of_eratosthenes_segmented(&config);
+        let primes = generators::sieve_of_eratosthenes(&config);
+        //let primes = generators::sieve_of_eratosthenes_segmented(&config);
 
         if config.prime_range_end > 1000 {
             println!("{} primes found under {}", primes.len(), config.prime_range_end);
