@@ -84,6 +84,7 @@ pub mod generators {
     /// - starting_multiple - The starting multiplication of the prime number if calculating on a
     /// - segment, default should be 0
     /// - offset - The offset the sieve is at if its segmented, default should be 0
+    #[inline]
     fn sieve_prime_factor(
         sieve: &mut Vec<bool>,
         prime: u64,
@@ -112,6 +113,7 @@ pub mod generators {
     /// - sieve - The Boolean Sieve to convert
     /// - primes - A mutable reference to a Vector to store primes in
     /// - offset - The starting offset of the sieve if its segmented, default should be 0
+    #[inline]
     fn sieve_to_primes(
         sieve: &Vec<bool>,
         primes: &mut Vec<u64>,
