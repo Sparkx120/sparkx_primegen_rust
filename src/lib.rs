@@ -1,11 +1,18 @@
-pub mod common {
-    pub const TEN: u64         = 10;
-    pub const HUNDRED: u64     = 100;
-    pub const THOUSAND: u64    = 1000;
-    pub const MILLION: u64     = THOUSAND*1000;
-    pub const BILLION: u64     = MILLION*1000;
-    pub const TRILLION: u64    = BILLION*1000;
+#![doc = include_str!("../README.md")]
 
+/// Common structs and constants for sparkx_primegen
+pub mod common {
+    use std::fmt;
+
+    /// Config for sparkx_primegen
+    ///
+    /// # Examples
+    /// To construct a new config you can run
+    /// ```
+    /// let config = sparkx_primegen::Config::build(1000);
+    /// 
+    /// assert_eq!(1000, config.prime_range_end)
+    /// ```
     pub struct Config {
         pub prime_range_start: u64,
         pub prime_range_end: u64,
@@ -14,17 +21,24 @@ pub mod common {
     }
 
     impl Config {
-        pub fn build() -> Config {
+        pub fn build(prime_range_end: u64) -> Config {
             Config {
                 prime_range_start: 2,
-                prime_range_end: BILLION, // Will need >1 GB of ram
+                prime_range_end,
                 sieve_segment_size: 100,
                 progress: true, // Only for segmented calculation
             }
         }
     }
+
+    impl fmt::Display for Config {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "range_start: {}\nrange_end: {}", self.prime_range_start, self.prime_range_end)
+        }
+    }
 }
 
+/// Driver for sparkx_primegen binary application
 pub mod driver {
     // Crate
     use std::{io, io::Write};
@@ -33,8 +47,7 @@ pub mod driver {
     use super::common::Config;
     use super::generators;
 
-    pub fn run() {
-        let config = Config::build();
+    pub fn run(config: Config) {
         println!("Finding Prime Numbers between {} and {}", config.prime_range_start, config.prime_range_end);
 
         let primes = generators::sieve_of_eratosthenes(&config);
@@ -51,6 +64,10 @@ pub mod driver {
     }
 }
 
+/// Prime Number Generators
+///
+/// This Module has the various implementations of prime number generators that sparkx_primegen
+/// supports.
 pub mod generators {
     // Crate
     use integer_sqrt::IntegerSquareRoot;
@@ -59,6 +76,14 @@ pub mod generators {
     // Local
     use super::common::Config;
 
+    /// An Eratosthenes Sieve over some arbitrary boolean Vector
+    ///
+    /// # Params
+    /// - sieve - A mutable boolean vector
+    /// - prime - The prime number to sieve out
+    /// - starting_multiple - The starting multiplication of the prime number if calculating on a
+    /// - segment, default should be 0
+    /// - offset - The offset the sieve is at if its segmented, default should be 0
     fn sieve_prime_factor(
         sieve: &mut Vec<bool>,
         prime: u64,
@@ -81,6 +106,12 @@ pub mod generators {
 
     }
 
+    /// An Eratosthenes Sieve conversion to actual Prime Number Vector
+    ///
+    /// # Params
+    /// - sieve - The Boolean Sieve to convert
+    /// - primes - A mutable reference to a Vector to store primes in
+    /// - offset - The starting offset of the sieve if its segmented, default should be 0
     fn sieve_to_primes(
         sieve: &Vec<bool>,
         primes: &mut Vec<u64>,
@@ -94,6 +125,16 @@ pub mod generators {
         }
     }
 
+    /// An Eratosthenes Sieve generator
+    ///
+    /// This is the original Eratosthenes algorithm implemented entirely in memory, must be able to
+    /// allocate enough space for Config.primes_range_end or else program will be killed
+    ///
+    /// # Params
+    /// - config - reference to a [`Config`]
+    ///
+    /// # Returns
+    /// A Vetor with all found primes in ascending order
     pub fn sieve_of_eratosthenes(config: &Config) -> Vec<u64> {
         let mut sieve = Vec::with_capacity(config.prime_range_end as usize);
         let mut primes = Vec::new();
@@ -113,6 +154,16 @@ pub mod generators {
         primes
     }
 
+    /// A segmented implementation of Eratosthenes Sieve
+    ///
+    /// This implementation is flawed as it checks for prime factors on each segment instead of
+    /// sieving them. It is not recommended for use.
+    ///
+    /// # Params
+    /// - config - reference to a [`Config`]
+    ///
+    /// # Returns
+    /// A Vector with all found primes in ascending order
     pub fn sieve_of_eratosthenes_segmented(config: &Config) -> Vec<u64> {
         let mut primes = Vec::new();
         let total_sieve_segments = config.prime_range_end/config.sieve_segment_size;

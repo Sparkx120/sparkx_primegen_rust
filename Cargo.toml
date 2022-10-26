@@ -1,9 +1,15 @@
 [package]
 name = "sparkx_primegen"
-version = "0.1.0"
+authors = ["SparkX120 - James Wake"]
+license = "MIT OR Apache-2.0"
+version = "0.1.1"
+readme = "README.md"
+repository = "https://github.com/Sparkx120/sparkx_primegen_rust"
+description = "A prime number generator library and driver"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "4.0.18", features = ["derive"] }
 integer-sqrt = "0.1.5"
